@@ -73,10 +73,6 @@ MAX_EGL_CACHE_KEY_SIZE := 12*1024
 # of the device.
 MAX_EGL_CACHE_SIZE := 2048*1024
 
-# FM
-AUDIO_FEATURE_ENABLED_FM := true
-TARGET_QCOM_NO_FM_FIRMWARE := true
-
 # GPS
 TARGET_NO_RPC := true
 TARGET_GPS_HAL_PATH := device/samsung/msm8226-common/gps
