@@ -139,5 +139,8 @@ PRODUCT_PACKAGES += \
     init.recovery.qcom.rc \
     ueventd.qcom.rc
 
+# System properties
+-include $(LOCAL_PATH)/system_prop.mk
+
 # Inherit from qcom-common
 $(call inherit-product, device/samsung/qcom-common/qcom-common.mk)
