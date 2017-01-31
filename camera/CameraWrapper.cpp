@@ -21,7 +21,7 @@
 *
 */
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 #define LOG_TAG "CameraWrapper"
 #include <cutils/log.h>
@@ -31,7 +31,7 @@
 #include <hardware/hardware.h>
 #include <hardware/camera.h>
 #include <camera/Camera.h>
-#include <camera/CameraParameters2.h>
+#include <camera/CameraParameters.h>
 
 static android::Mutex gCameraWrapperLock;
 static camera_module_t *gVendorModule = 0;
@@ -46,7 +46,7 @@ static int camera_send_command(struct camera_device *device, int32_t cmd,
         int32_t arg1, int32_t arg2);
 
 static struct hw_module_methods_t camera_module_methods = {
-    .open = camera_device_open
+    .open = camera_device_open,
 };
 
 camera_module_t HAL_MODULE_INFO_SYM = {
@@ -61,6 +61,7 @@ camera_module_t HAL_MODULE_INFO_SYM = {
          .dso = NULL, /* remove compilation warnings */
          .reserved = {0}, /* remove compilation warnings */
     },
+
     .get_number_of_cameras = camera_get_number_of_cameras,
     .get_camera_info = camera_get_camera_info,
     .set_callbacks = NULL, /* remove compilation warnings */
@@ -93,8 +94,7 @@ static int check_vendor_module()
         return 0;
 
     rv = hw_get_module_by_class("camera", "vendor",
-            (const hw_module_t **)&gVendorModule);
-
+            (const hw_module_t**)&gVendorModule);
     if (rv)
         ALOGE("failed to open vendor camera module");
     return rv;
@@ -102,7 +102,7 @@ static int check_vendor_module()
 
 #define KEY_VIDEO_HFR_VALUES "video-hfr-values"
 
-const static char * iso_values[] = {"auto,ISO_HJR,ISO100,ISO200,ISO400,ISO800,ISO1600,auto"};
+const static char * iso_values[] = {"auto,ISO_HJR,ISO100,ISO200,ISO400,ISO800"};
 
 static char *camera_fixup_getparams(int id, const char *settings)
 {
@@ -117,9 +117,9 @@ static char *camera_fixup_getparams(int id, const char *settings)
     // fix params here
     params.set(android::CameraParameters::KEY_SUPPORTED_ISO_MODES, iso_values[id]);
     params.set(android::CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP, "0.5");
-    params.set(android::CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION, "-4");
-    params.set(android::CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION, "4");
-
+    params.set(android::CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION, "-2");
+    params.set(android::CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION, "2");
+	
     /* If the vendor has HFR values but doesn't also expose that
      * this can be turned off, fixup the params to tell the Camera
      * that it really is okay to turn it off.
@@ -130,9 +130,9 @@ static char *camera_fixup_getparams(int id, const char *settings)
         sprintf(tmp, "%s,off", hfrValues);
         params.set(KEY_VIDEO_HFR_VALUES, tmp);
     }
-
-    /* Enforce video-snapshot-supported to true */
-    params.set(android::CameraParameters::KEY_VIDEO_SNAPSHOT_SUPPORTED, "true");
+	
+    params.set("whitebalance-values", "auto,incandescent,fluorescent,daylight,cloudy-daylight");
+    params.set("effect-values", "none,mono,negative,sepia");
 
     android::String8 strParams = params.flatten();
     char *ret = strdup(strParams.string());
@@ -156,17 +156,6 @@ static char *camera_fixup_setparams(struct camera_device *device, const char *se
     params.dump();
 #endif
 
-    const char *recordingHint = params.get(android::CameraParameters::KEY_RECORDING_HINT);
-    bool isVideo = recordingHint && !strcmp(recordingHint, "true");
-
-    if (isVideo) {
-        params.set(android::CameraParameters::KEY_DIS, android::CameraParameters::DIS_DISABLE);
-        params.set(android::CameraParameters::KEY_ZSL, android::CameraParameters::ZSL_OFF);
-    } else {
-        params.set(android::CameraParameters::KEY_ZSL, android::CameraParameters::ZSL_ON);
-    }
-
-    // fix params here
     // No need to fix-up ISO_HJR, it is the same for userspace and the camera lib
     if (params.get("iso")) {
         const char *isoMode = params.get(android::CameraParameters::KEY_ISO_MODE);
@@ -178,8 +167,12 @@ static char *camera_fixup_setparams(struct camera_device *device, const char *se
             params.set(android::CameraParameters::KEY_ISO_MODE, "400");
         else if (strcmp(isoMode, "ISO800") == 0)
             params.set(android::CameraParameters::KEY_ISO_MODE, "800");
-        else if (strcmp(isoMode, "ISO1600") == 0)
-            params.set(android::CameraParameters::KEY_ISO_MODE, "1600");
+    }
+	
+    int video_width, video_height;
+    params.getPreviewSize(&video_width, &video_height);
+    if(video_width*video_height == 720*540){
+	 params.set("preview-size", "960x540");  
     }
 
     android::String8 strParams = params.flatten();
@@ -226,7 +219,8 @@ static void camera_set_callbacks(struct camera_device *device,
     if (!device)
         return;
 
-    VENDOR_CALL(device, set_callbacks, notify_cb, data_cb, data_cb_timestamp, get_memory, user);
+    VENDOR_CALL(device, set_callbacks, notify_cb, data_cb, data_cb_timestamp,
+            get_memory, user);
 }
 
 static void camera_enable_msg_type(struct camera_device *device,
@@ -399,7 +393,8 @@ static int camera_cancel_picture(struct camera_device *device)
     return VENDOR_CALL(device, cancel_picture);
 }
 
-static int camera_set_parameters(struct camera_device *device, const char *params)
+static int camera_set_parameters(struct camera_device *device,
+        const char *params)
 {
     ALOGV("%s->%08X->%08X", __FUNCTION__, (uintptr_t)device,
             (uintptr_t)(((wrapper_camera_device_t*)device)->vendor));
