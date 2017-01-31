@@ -77,9 +77,6 @@ TARGET_QCOM_NO_FM_FIRMWARE := true
 # Fonts
 EXTENDED_FONT_FOOTPRINT := true
 
-# Init
-TARGET_INIT_VENDOR_LIB := libinit_msm
-
 # Partitions and Vold
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
 TARGET_USERIMAGES_USE_EXT4 := true
