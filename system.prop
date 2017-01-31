@@ -13,6 +13,10 @@ qcom.bluetooth.soc=smd
 # Camera
 camera2.portability.force_api=1
 
+# CWMR Options
+ro.cwm.forbid_format=/boot,/firmware,/firmware-modem
+ro.cwm.forbid_mount=/boot
+
 # Dalvik
 dalvik.vm.heapstartsize=8m
 dalvik.vm.heapgrowthlimit=128m
