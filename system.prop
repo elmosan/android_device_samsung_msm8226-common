@@ -59,6 +59,7 @@ persist.sys.ssr.enable_debug=0
 ro.qc.sdk.gestures.camera=false
 ro.qc.sdk.camera.facialproc=false
 ro.qc.sdk.sensors.gestures=true
+debug.sensors=1
 
 # Storage
 ro.sys.sdcardfs=true
