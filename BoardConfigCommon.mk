@@ -19,6 +19,9 @@ VENDOR_PATH := device/samsung/msm8226-common
 
 TARGET_SPECIFIC_HEADER_PATH := $(VENDOR_PATH)/include
 
+# Use Snapdragon LLVM, if available
+TARGET_USE_SDCLANG := true
+
 # Architecture
 TARGET_CPU_MEMCPY_BASE_OPT_DISABLE := true
 TARGET_CPU_VARIANT := krait
