@@ -37,6 +37,7 @@ PRODUCT_PACKAGES += \
     camera.msm8226 \
     libboringssl-compat \
     libstlport \
+    libtinyxml \
     libxml2 \
     Snap
 
