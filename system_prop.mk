@@ -9,6 +9,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.qc.sdk.audio.fluencetype=none \
     use.voice.path.for.pcm.voip=false
 
+# Bluetooth
+PRODUCT_PROPERTY_OVERRIDES += \
+    qcom.bluetooth.soc=smd
+
 # Camera
 PRODUCT_PROPERTY_OVERRIDES += \
     camera2.portability.force_api=1
