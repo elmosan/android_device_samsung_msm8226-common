@@ -37,9 +37,8 @@ PRODUCT_PACKAGES += \
     camera.msm8226 \
     libboringssl-compat \
     libstlport \
-    libtinyxml \
-    libxml2 \
-    Snap
+    libxml2
+    #Snap
 
 # CRDA
 PRODUCT_PACKAGES += \
@@ -134,10 +133,10 @@ PRODUCT_PACKAGES += \
     init.qcom.bt.sh
 
 PRODUCT_PACKAGES += \
-    init.qcom.power.rc \
     init.qcom.rc \
+    init.qcom.power.rc \
+    init.qcom.recovery.rc \
     init.qcom.usb.rc \
-    init.recovery.qcom.rc \
     ueventd.qcom.rc
 
 # System properties
